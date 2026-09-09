@@ -1,5 +1,6 @@
 "use client";
 
+import IgdbCredit from "@/components/IgdbCredit";
 import PlatformPicker from "@/components/platform-picker";
 import RatingPicker from "@/components/rating-picker";
 import StatusPicker from "@/components/status-picker";
@@ -283,6 +284,8 @@ export default function AddGameScreen() {
               <Text className="text-white font-semibold">Add Game</Text>
             )}
           </TouchableOpacity>
+
+          <IgdbCredit className="mt-8" />
         </View>
       </ScrollView>
     </SafeAreaView>

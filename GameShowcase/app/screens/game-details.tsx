@@ -1,5 +1,6 @@
 "use client";
 
+import IgdbCredit from "@/components/IgdbCredit";
 import GlassButton from "@/components/ui/GlassButton";
 import { useGames } from "@/hooks/useGames";
 import { useToast } from "@/hooks/useToast";
@@ -263,6 +264,8 @@ export default function GameDetailsScreen() {
                             <Text className="text-white font-semibold">{deleting ? "Deleting..." : "Delete Game"}</Text>
                         </TouchableOpacity>
                     </View>
+
+                    <IgdbCredit className="mt-8" />
                 </View>
             </ScrollView>
         </SafeAreaView>

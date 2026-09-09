@@ -1,6 +1,7 @@
 "use client";
 
 import AddGameButton from "@/components/AddGameButton";
+import IgdbCredit from "@/components/IgdbCredit";
 import GlassButton from "@/components/ui/GlassButton";
 import SortFilterSheet, {
     DEFAULT_DIRECTION,
@@ -297,6 +298,7 @@ export default function GamesTab() {
                         <Text className="text-center text-gray-600 dark:text-gray-400">Try a different sort or clear the current status filter.</Text>
                     </View>
                 }
+                ListFooterComponent={<IgdbCredit className="mt-6" />}
                 style={{ flex: 1 }}
                 contentContainerStyle={{ paddingBottom: insets.bottom + 96 + bannerHeight }}
                 showsVerticalScrollIndicator={false}

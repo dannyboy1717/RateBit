@@ -1,5 +1,6 @@
 "use client";
 
+import IgdbCredit from "@/components/IgdbCredit";
 import GlassButton from "@/components/ui/GlassButton";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
@@ -180,7 +181,12 @@ export default function SearchGameScreen() {
                 keyExtractor={(item) => String(item.id)}
                 renderItem={renderResult}
                 ListHeaderComponent={renderStatus()}
-                ListFooterComponent={escapeHatchRow}
+                ListFooterComponent={
+                    <>
+                        {escapeHatchRow}
+                        <IgdbCredit className="mt-2" />
+                    </>
+                }
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 24 }}
                 showsVerticalScrollIndicator={false}

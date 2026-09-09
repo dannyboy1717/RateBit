@@ -1,5 +1,6 @@
 "use client";
 
+import IgdbCredit from "@/components/IgdbCredit";
 import GlassButton from "@/components/ui/GlassButton";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useToast } from "@/hooks/useToast";
@@ -204,6 +205,8 @@ export default function AccountTab() {
               <Text className="text-red-600 dark:text-red-400 underline">Delete account</Text>
             )}
           </TouchableOpacity>
+
+          <IgdbCredit className="mt-10" />
         </View>
       </SafeAreaView>
     );
@@ -295,6 +298,8 @@ export default function AccountTab() {
             <Text className="text-indigo-600 dark:text-indigo-400 font-semibold text-base">Create Account</Text>
           </TouchableOpacity>
         </View>
+
+        <IgdbCredit className="mt-10" />
       </View>
     </SafeAreaView>
   );
