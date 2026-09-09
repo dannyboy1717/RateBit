@@ -2,7 +2,7 @@
 
 import IgdbCredit from "@/components/IgdbCredit";
 import PlatformPicker from "@/components/platform-picker";
-import RatingPicker from "@/components/rating-picker";
+import RatingPicker, { NO_RATING } from "@/components/rating-picker";
 import StatusPicker from "@/components/status-picker";
 import GlassButton from "@/components/ui/GlassButton";
 import { Image } from "expo-image";
@@ -83,7 +83,7 @@ export default function EditGameScreen() {
     const [selectedStartDate, setSelectedStartDate] = useState<string | undefined>(undefined);
     const [selectedFinishDate, setSelectedFinishDate] = useState<string | undefined>(undefined);
     const [selectedPlaytime, setSelectedPlaytime] = useState<string | undefined>(undefined);
-    const [selectedRating, setSelectedRating] = useState<number>(-1);
+    const [selectedRating, setSelectedRating] = useState<number>(NO_RATING);
     const [selectedStatus, setSelectedStatus] = useState<GameStatus>("Plan to Play");
     const [selectedBoughtDate, setSelectedBoughtDate] = useState<string | undefined>(undefined);
     const [selectedCost, setSelectedCost] = useState<string | undefined>(undefined);
@@ -111,7 +111,7 @@ export default function EditGameScreen() {
             setSelectedStartDate(existingGame.Started ?? undefined);
             setSelectedFinishDate(existingGame.Finished ?? undefined);
             setSelectedPlaytime(existingGame.Playtime ?? undefined);
-            setSelectedRating(existingGame.Rating ?? -1);
+            setSelectedRating(existingGame.Rating ?? NO_RATING);
             setSelectedStatus(existingGame.Status ?? "Plan to Play");
             setSelectedBoughtDate(existingGame.Bought ?? undefined);
             setSelectedCost(existingGame.Cost ?? undefined);
