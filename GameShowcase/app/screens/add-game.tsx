@@ -16,24 +16,6 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { GamePlatform, GameStatus } from "../types/supabase";
 
-export const platforms: GamePlatform[] = [
-  "PC",
-  "Xbox",
-  "PS5",
-  "PS4",
-  "PS3",
-  "PS2",
-  "PS1",
-  "PS Vita",
-  "PSP",
-  "Switch",
-  "Switch 2",
-  "3DS",
-  "DS",
-  "GBA",
-  "SNES",
-];
-
 function InputField({
   label,
   value,
@@ -69,19 +51,22 @@ function InputField({
 }
 
 /**
- * Router params are always strings. The search screen passes the mapped
- * platforms as a JSON array; fall back to "PC" when absent or malformed.
+ * Router params are always strings. The search screen passes the game's IGDB
+ * platforms as a JSON array and the first is used as the seed.
+ *
+ * Falls back to unselected rather than a guess: the old default of "PC" quietly
+ * mislabelled every console game whose owner didn't notice the field.
  */
 function parseSeededPlatform(raw: string | undefined): GamePlatform {
   if (!raw) {
-    return "PC";
+    return "";
   }
 
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? (parsed[0] as GamePlatform) : "PC";
+    return Array.isArray(parsed) && parsed.length > 0 ? String(parsed[0]) : "";
   } catch {
-    return "PC";
+    return "";
   }
 }
 
@@ -206,7 +191,7 @@ export default function AddGameScreen() {
               placeholder="Enter developer or publisher"
             />
 
-            <PlatformPicker options={platforms} selected={selectedPlatform} onSelectedChange={setSelectedPlatform} />
+            <PlatformPicker selected={selectedPlatform} onSelectedChange={setSelectedPlatform} />
 
             <StatusPicker statuses={statuses} selected={selectedStatus} onSelectedChange={setSelectedStatus} />
             <RatingPicker value={selectedRating} onValueChange={setSelectedRating} />

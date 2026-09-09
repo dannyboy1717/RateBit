@@ -14,51 +14,41 @@ export type IgdbGame = {
 };
 
 /**
- * IGDB tracks far more platforms than this app does, and names them
- * differently. Keys are verified against IGDB's /v4/platforms list.
- *
- * Anything absent is dropped rather than guessed at — the GamePlatform union
- * has no entry for N64, NES, GameCube, Game Boy, Linux, mobile or VR, so those
- * simply don't preselect and the user picks a platform in the form.
+ * Shown in the platform picker before the user searches, so the common case
+ * needs no network round-trip. These are IGDB's exact names — the picker stores
+ * whatever string it hands back, and matching IGDB's spelling keeps hand-picked
+ * platforms consistent with ones seeded from a game match.
  */
-const IGDB_PLATFORM_MAP: Record<string, GamePlatform> = {
-  "PC (Microsoft Windows)": "PC",
-
-  Xbox: "Xbox",
-  "Xbox 360": "Xbox",
-  "Xbox One": "Xbox",
-  "Xbox Series X|S": "Xbox",
-
-  PlayStation: "PS1",
-  "PlayStation 2": "PS2",
-  "PlayStation 3": "PS3",
-  "PlayStation 4": "PS4",
-  "PlayStation 5": "PS5",
-  "PlayStation Vita": "PS Vita",
-  "PlayStation Portable": "PSP",
-
-  "Nintendo Switch": "Switch",
-  "Nintendo Switch 2": "Switch 2",
-  "Nintendo 3DS": "3DS",
-  "New Nintendo 3DS": "3DS",
-  "Nintendo DS": "DS",
-  "Nintendo DSi": "DS",
-  "Game Boy Advance": "GBA",
-  "Super Nintendo Entertainment System": "SNES",
-  "Super Famicom": "SNES",
-};
+export const COMMON_PLATFORMS: GamePlatform[] = [
+  "PC (Microsoft Windows)",
+  "PlayStation 5",
+  "PlayStation 4",
+  "PlayStation 3",
+  "PlayStation 2",
+  "PlayStation",
+  "Xbox Series X|S",
+  "Xbox One",
+  "Xbox 360",
+  "Xbox",
+  "Nintendo Switch 2",
+  "Nintendo Switch",
+  "Nintendo 3DS",
+  "Nintendo DS",
+  "Game Boy Advance",
+  "Super Nintendo Entertainment System",
+  "PlayStation Vita",
+  "PlayStation Portable",
+];
 
 /**
- * Maps IGDB platform names onto the platforms this app supports, preserving
- * IGDB's ordering and dropping unknown entries. Duplicates are collapsed, since
- * several IGDB platforms can map to the same one here (e.g. every Xbox).
+ * Platform names as IGDB gave them, deduplicated and in IGDB's order.
+ *
+ * This used to fold IGDB's names onto a fixed list of 15 and drop the rest,
+ * which silently lost N64, GameCube, Dreamcast, mobile and everything else.
+ * The column is free text now, so the names pass straight through.
  */
 export function mapIgdbPlatforms(names: string[]): GamePlatform[] {
-  const mapped = names
-    .map((name) => IGDB_PLATFORM_MAP[name])
-    .filter((platform): platform is GamePlatform => Boolean(platform));
-
-  return Array.from(new Set(mapped));
+  return Array.from(new Set(names.filter(Boolean)));
 }
 
 /**
@@ -82,6 +72,30 @@ export async function searchIgdbGames(query: string): Promise<IgdbGame[]> {
     return data?.results ?? [];
   } catch (err) {
     console.warn("IGDB search failed:", err);
+    return [];
+  }
+}
+
+/**
+ * Searches IGDB's platform list for the picker.
+ *
+ * Degrades to an empty list on failure like searchIgdbGames, since the picker
+ * always offers COMMON_PLATFORMS and free-text entry as a fallback.
+ */
+export async function searchIgdbPlatforms(query: string): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke<{ results?: string[] }>("igdb-search", {
+      body: { query, type: "platform" },
+    });
+
+    if (error) {
+      console.warn("IGDB platform search failed:", error.message);
+      return [];
+    }
+
+    return data?.results ?? [];
+  } catch (err) {
+    console.warn("IGDB platform search failed:", err);
     return [];
   }
 }

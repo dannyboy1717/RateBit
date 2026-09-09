@@ -13,7 +13,6 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 import type { Database } from "../types/database";
 import { GamePlatform, GameStatus } from "../types/supabase";
-import { platforms } from "./add-game";
 import { useGames } from "@/hooks/useGames";
 import { useToast } from "@/hooks/useToast";
 
@@ -79,7 +78,7 @@ export default function EditGameScreen() {
 
     const [selectedName, setSelectedName] = useState<string>("");
     const [selectedDeveloper, setSelectedDeveloper] = useState<string | undefined>(undefined);
-    const [selectedPlatform, setSelectedPlatform] = useState<GamePlatform>("PC");
+    const [selectedPlatform, setSelectedPlatform] = useState<GamePlatform>("");
     const [selectedStartDate, setSelectedStartDate] = useState<string | undefined>(undefined);
     const [selectedFinishDate, setSelectedFinishDate] = useState<string | undefined>(undefined);
     const [selectedPlaytime, setSelectedPlaytime] = useState<string | undefined>(undefined);
@@ -107,7 +106,7 @@ export default function EditGameScreen() {
 
             setSelectedName(matchedName || existingGame.Name || "");
             setSelectedDeveloper(matchedDeveloper || existingGame["Developer/Publisher"] || undefined);
-            setSelectedPlatform(existingGame.Platform ?? "PC");
+            setSelectedPlatform(existingGame.Platform ?? "");
             setSelectedStartDate(existingGame.Started ?? undefined);
             setSelectedFinishDate(existingGame.Finished ?? undefined);
             setSelectedPlaytime(existingGame.Playtime ?? undefined);
@@ -248,7 +247,7 @@ export default function EditGameScreen() {
                             placeholder="Enter developer or publisher"
                         />
 
-                        <PlatformPicker options={platforms} selected={selectedPlatform} onSelectedChange={setSelectedPlatform} />
+                        <PlatformPicker selected={selectedPlatform} onSelectedChange={setSelectedPlatform} />
 
                         <StatusPicker statuses={statuses} selected={selectedStatus} onSelectedChange={setSelectedStatus} />
                         <RatingPicker value={selectedRating} onValueChange={setSelectedRating} />

@@ -7,22 +7,14 @@ export type GameStatus =
   | "Paused" 
   | "Plan to Play";
   
-export type GamePlatform =
-  | "Xbox"
-  | "PS5"
-  | "PS4"
-  | "PS3"
-  | "PS2"
-  | "PS1"
-  | "PC"
-  | "PS Vita"
-  | "PSP"
-  | "3DS"
-  | "DS"
-  | "Switch"
-  | "GBA"
-  | "SNES"
-  | "Switch 2";
+/**
+ * Free-form since the platform migration: IGDB tracks ~200 platforms and adds
+ * more, so the app searches IGDB's /platforms endpoint rather than carrying its
+ * own list. The database column is plain text and IGDB is the source of truth
+ * for names. COMMON_PLATFORMS in app/lib/igdb.ts holds the shortlist the picker
+ * offers before the user types.
+ */
+export type GamePlatform = string;
 
 export interface Game {
   id: number;

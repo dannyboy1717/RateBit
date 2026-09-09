@@ -1,5 +1,11 @@
 /**
- * igdb-search — proxies game searches to IGDB (Twitch's game database).
+ * igdb-search — proxies game and platform searches to IGDB (Twitch's game
+ * database).
+ *
+ * Request body: { query: string, type?: "game" | "platform" }. "game" is the
+ * default and returns IgdbGame objects; "platform" returns bare platform-name
+ * strings for the platform picker. The default keeps older app builds working
+ * against this function unchanged.
  *
  * This function exists so the IGDB client secret never reaches the app. An Expo
  * JS bundle ships inside the IPA/APK and unzips to near-plaintext, so anything
@@ -18,9 +24,12 @@ const IGDB_CLIENT_SECRET = Deno.env.get("IGDB_CLIENT_SECRET");
 
 const TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const IGDB_GAMES_URL = "https://api.igdb.com/v4/games";
+const IGDB_PLATFORMS_URL = "https://api.igdb.com/v4/platforms";
 const IGDB_IMAGE_BASE = "https://images.igdb.com/igdb/image/upload";
 
 const RESULT_LIMIT = 15;
+/** Platform names are one line each, so more of them fit a picker usefully. */
+const PLATFORM_RESULT_LIMIT = 25;
 /**
  * Over-fetch so there is something to re-rank. IGDB's relevance order buries
  * popular titles — a search for "zelda" returns neither Breath of the Wild nor
@@ -207,6 +216,47 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
+/**
+ * Platform-name lookup for the platform picker.
+ *
+ * Returns bare names rather than IDs: the Games table stores the platform as
+ * text the user chose, so a name is the whole payload. Deduplicated because
+ * IGDB carries a few same-named entries.
+ */
+async function searchPlatforms(searchTerm: string, token: string): Promise<Response> {
+  const response = await fetch(IGDB_PLATFORMS_URL, {
+    method: "POST",
+    headers: {
+      "Client-ID": IGDB_CLIENT_ID!,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "text/plain",
+    },
+    // `search` is supported on /platforms, and as with /games it cannot be
+    // combined with `sort` — IGDB's own relevance order is what comes back.
+    body: [
+      `search "${searchTerm}";`,
+      "fields name;",
+      `limit ${PLATFORM_RESULT_LIMIT};`,
+    ].join("\n"),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      cachedToken = null;
+    }
+
+    console.error(`IGDB platform search failed (${response.status})`);
+    return jsonResponse({ results: [], error: "IGDB platform search failed." }, 502);
+  }
+
+  const platforms: { name?: string }[] = await response.json();
+  const names = platforms
+    .map((platform) => platform.name)
+    .filter((name): name is string => Boolean(name));
+
+  return jsonResponse({ results: Array.from(new Set(names)) }, 200);
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -218,7 +268,9 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const { query } = await request.json();
+    // `type` is optional and defaults to "game", so builds that predate the
+    // platform picker keep working against this function unchanged.
+    const { query, type } = await request.json();
 
     if (typeof query !== "string" || query.trim().length < 2) {
       return jsonResponse({ results: [] }, 200);
@@ -231,6 +283,10 @@ Deno.serve(async (request) => {
     }
 
     const token = await getAccessToken();
+
+    if (type === "platform") {
+      return await searchPlatforms(searchTerm, token);
+    }
 
     // Note: `search` cannot be combined with `sort` in APICalypse — IGDB
     // returns results in its own relevance order.
